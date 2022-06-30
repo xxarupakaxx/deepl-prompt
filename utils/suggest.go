@@ -1,6 +1,8 @@
 package utils
 
-import "github.com/c-bata/go-prompt"
+import (
+	"github.com/c-bata/go-prompt"
+)
 
 func argumentsCompleter(args []string) []prompt.Suggest {
 	if len(args) <= 1 {
@@ -12,7 +14,7 @@ func argumentsCompleter(args []string) []prompt.Suggest {
 		if len(args) == 2 {
 			subCommands := []prompt.Suggest{
 				{Text: "EN", Description: "英語"},
-				{Text: "BG"},
+				{Text: "BG",Description: "Bulgarian"},
 				{Text: "CS"},
 				{Text: "DA"},
 				{Text: "DE"},
@@ -59,7 +61,7 @@ var commands = []prompt.Suggest{
 		Description: "deepl-promptからばいばい",
 	},
 	{
-		Text:        "usage",
-		Description: "翻訳量や設定された制限を監視することができます",
+		Text:        "help",
+		Description: "コマンドの詳細が確認できます",
 	},
 }
