@@ -46,7 +46,7 @@ func NewPrompt() *prompt.Prompt {
 	}
 
 	ctx.header.Set("Authorization", "DeepL-Auth-Key "+os.Getenv("auth_key"))
-	ctx.SetLanguage("EN-US")
+	ctx.SetLanguage("EN")
 	p := prompt.New(
 		executor,
 		completer,
@@ -82,6 +82,10 @@ func executor(s string) {
 		fmt.Println("おおおおおおおおおおおおおお！")
 		os.Exit(0)
 	case "translate":
+		if len(cmds) <= 1 {
+			fmt.Println("翻訳する文がありません")
+			return
+		}
 		text, err := PostTranslate(cmds[1])
 		if err != nil {
 			fmt.Println(err)
@@ -89,7 +93,13 @@ func executor(s string) {
 		}
 		fmt.Println(text)
 	case "change":
-		ChangeLanguage(cmds[1])
+		if len(cmds) <= 1 {
+			fmt.Println("言語を指定してください")
+			return
+		}
+		ValidateLanguage(cmds[1])
 		prefix.livePrefix = "Deepl-prompt To " + cmds[1] + " >>>"
+	case "help":
+		fmt.Println(HelpMessages())
 	}
 }
