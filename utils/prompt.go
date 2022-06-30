@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/c-bata/go-prompt"
-	"github.com/joho/godotenv"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -40,13 +38,8 @@ func NewPrompt() *prompt.Prompt {
 		isEnable:   true,
 	}
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	ctx.header.Set("Authorization", "DeepL-Auth-Key "+os.Getenv("auth_key"))
 	ctx.SetLanguage("EN")
+
 	p := prompt.New(
 		executor,
 		completer,
@@ -54,6 +47,7 @@ func NewPrompt() *prompt.Prompt {
 		prompt.OptionHistory([]string{
 			"change EN",
 			"translate こんにちは",
+			"set [key]",
 		}),
 		prompt.OptionLivePrefix(prefix.LivePrefix),
 		prompt.OptionInputTextColor(prompt.Yellow),
@@ -86,6 +80,13 @@ func executor(s string) {
 			fmt.Println("翻訳する文がありません")
 			return
 		}
+		key, err := ctx.GetAuthKey()
+		if err != nil {
+			fmt.Println("認証キーが取得できません。setコマンドで認証キーを設定してください。")
+			return
+		}
+
+		ctx.header.Set("Authorization", "DeepL-Auth-Key "+key)
 		text, err := PostTranslate(cmds[1])
 		if err != nil {
 			fmt.Println(err)
@@ -101,5 +102,8 @@ func executor(s string) {
 		prefix.livePrefix = "Deepl-prompt To " + cmds[1] + " >>>"
 	case "help":
 		fmt.Println(HelpMessages())
+	case "set":
+		ctx.SetAuthKey(cmds[1])
+		fmt.Println("認証キーがセットされました")
 	}
 }

@@ -53,9 +53,12 @@ func PostTranslate(s string) (string, error) {
 		return "", fmt.Errorf("failed to read response body :%w", err)
 	}
 
-	if res.StatusCode >= 400 {
+	if res.StatusCode == 400 {
 
-		return "", fmt.Errorf("failed to post : badrequest: %v", string(body))
+		return "", fmt.Errorf("failed to post : badrequest")
+	}
+	if res.StatusCode == 403 {
+		return "", fmt.Errorf("認証ができていません。setコマンドで設定したキーが間違っているかもしれません。")
 	}
 
 	var data Response

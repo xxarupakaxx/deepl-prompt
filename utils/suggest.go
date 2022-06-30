@@ -50,7 +50,7 @@ func argumentsCompleter(args []string) []prompt.Suggest {
 var commands = []prompt.Suggest{
 	{
 		Text:        "change",
-		Description: "翻訳する言語を変更します。",
+		Description: "翻訳する言語を変更します",
 	},
 	{
 		Text:        "translate",
@@ -63,5 +63,9 @@ var commands = []prompt.Suggest{
 	{
 		Text:        "help",
 		Description: "コマンドの詳細が確認できます",
+	},
+	{
+		Text:        "set",
+		Description: "翻訳するために認証を行います。setコマンドで認証キーを指定してください",
 	},
 }
