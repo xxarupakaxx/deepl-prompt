@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"github.com/c-bata/go-prompt"
+	"github.com/joho/godotenv"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,12 +14,6 @@ import (
 
 // Header に DeepL-Auth-Key を追加してPOST
 // split_sentencesは0に設定するべきかも　"nonewlines" -もあり
-
-type MyCtx struct {
-	url    *url.URL
-	header http.Header
-	client *http.Client
-}
 
 type MyPrefix struct {
 	livePrefix string
@@ -27,7 +24,7 @@ func (m *MyPrefix) LivePrefix() (string, bool) {
 	return m.livePrefix, m.isEnable
 }
 
-var livePrefix *MyPrefix
+var prefix *MyPrefix
 var ctx *MyCtx
 
 func NewPrompt() *prompt.Prompt {
@@ -36,12 +33,20 @@ func NewPrompt() *prompt.Prompt {
 		url:    u,
 		header: http.Header{},
 		client: &http.Client{},
+		c:      context.Background(),
 	}
-	livePrefix = &MyPrefix{
-		livePrefix: ">>>",
-		isEnable:   false,
+	prefix = &MyPrefix{
+		livePrefix: "Deepl-prompt >>>",
+		isEnable:   true,
 	}
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	ctx.header.Set("Authorization", "DeepL-Auth-Key "+os.Getenv("auth_key"))
+	ctx.SetLanguage("EN-US")
 	p := prompt.New(
 		executor,
 		completer,
@@ -49,10 +54,8 @@ func NewPrompt() *prompt.Prompt {
 			"change EN",
 			"translate こんにちは",
 		}),
-		prompt.OptionDescriptionBGColor(prompt.Brown),
-		prompt.OptionPrefix("Deepl-prompt >>>"),
-		prompt.OptionLivePrefix(livePrefix.LivePrefix),
-		prompt.OptionMaxSuggestion(2),
+		prompt.OptionLivePrefix(prefix.LivePrefix),
+		prompt.OptionInputTextColor(prompt.Yellow),
 	)
 
 	return p
@@ -60,19 +63,27 @@ func NewPrompt() *prompt.Prompt {
 }
 
 func completer(d prompt.Document) []prompt.Suggest {
-	s := d.GetWordBeforeCursor()
-	return prompt.FilterContains(GetSuggestions(), s, true)
+	args := strings.Split(d.TextBeforeCursor(), " ")
+	//w := d.GetWordBeforeCursor()
+	return argumentsCompleter(args)
 }
 
 func executor(s string) {
 	s = strings.TrimSpace(s)
-	commands := strings.Split(s," ")
-	switch commands[0] {
+	cmds := strings.Split(s, " ")
+	switch cmds[0] {
 	case "exit":
 		fmt.Println("おおおおおおおおおおおおおお！")
 		os.Exit(0)
 	case "translate":
-
-
+		text, err := PostTranslate(cmds[1])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(text)
+	case "change":
+		ChangeLanguage(cmds[1])
+		prefix.livePrefix = "Deepl-prompt To " + cmds[1] + " >>>"
 	}
 }
