@@ -50,12 +50,18 @@ func NewPrompt() *prompt.Prompt {
 	p := prompt.New(
 		executor,
 		completer,
+		prompt.OptionTitle("Welcome to deepl-prompt"),
 		prompt.OptionHistory([]string{
 			"change EN",
 			"translate こんにちは",
 		}),
 		prompt.OptionLivePrefix(prefix.LivePrefix),
 		prompt.OptionInputTextColor(prompt.Yellow),
+		prompt.OptionSelectedSuggestionBGColor(prompt.White),
+		prompt.OptionSuggestionTextColor(prompt.DarkGray),
+		prompt.OptionDescriptionTextColor(prompt.DarkGreen),
+		prompt.OptionDescriptionBGColor(prompt.DarkGray),
+		prompt.OptionSelectedDescriptionTextColor(prompt.DarkGray),
 	)
 
 	return p
