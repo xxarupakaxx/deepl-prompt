@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -18,14 +19,12 @@ type Translation struct {
 
 func PostTranslate(s string) (string, error) {
 	url, err := url2.Parse(ctx.url.String() + "translate")
-	fmt.Println(url)
 	if err != nil {
 
 		return "", fmt.Errorf("failed to url parse :%w", err)
 	}
 
 	lan, err := ctx.GetLanguage()
-
 	if err != nil {
 		return "", fmt.Errorf("failed to get language :%w", err)
 	}
@@ -59,5 +58,10 @@ func PostTranslate(s string) (string, error) {
 		return "", fmt.Errorf("failed to post : badrequest: %v", string(body))
 	}
 
-	return string(body), nil
+	var data Response
+	if err = json.Unmarshal(body, &data); err != nil {
+		return "", err
+	}
+
+	return data.Translations[0].Text, nil
 }
